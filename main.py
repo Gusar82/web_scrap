@@ -18,13 +18,11 @@ def get_soup(url, header):
     return bs4.BeautifulSoup(text, features='html.parser')
 
 
-def get_articles_previw(soup):
+def get_articles_preview(soup):
     class_ = 'tm-article-body tm-article-snippet__lead'
     # class_v2 = "article-formatted-body article-formatted-body article-formatted-body_version-2"
     # class_v1 = "article-formatted-body article-formatted-body article-formatted-body_version-1"
     previw = soup.find(class_=class_)
-    # if previw:
-        # print(previw.prettify())
     # print(previw.get_text())
     return previw.get_text()
 
@@ -35,7 +33,7 @@ def search_keywords(text, keywords):
     #         return True
     # return False
     set_search = set(text.lower().split()) & set(keywords)
-    return bool(set_search)
+    return set_search
 
 
 def get_date_articles(soup):
@@ -55,6 +53,13 @@ def get_href_articles(soup, base_url):
     return base_url+title['href']
 
 
+def get_articles_all_text(soup):
+    id_ = "post-content-body"
+    xmlns_ = "http://www.w3.org/1999/xhtml"
+    all_article = soup.find(id=id_).find(xmlns=xmlns_)
+    return all_article.get_text()
+
+
 def output_article(soup, base_url):
     """в формате: <дата> - <заголовок> - <ссылка>"""
     date = get_date_articles(soup)
@@ -70,15 +75,24 @@ def main():
     url = base_url + '/ru/all/'
     soup = get_soup(url, HEADERS)
     articles = soup.find_all('article')
+
+    # Задача №1:
+    print("Задача №1 : Поиск по preview", sep="\n")
     for article in articles:
         # pprint(article.prettify())
-        text_article = get_articles_previw(article)
-        if search_keywords(text_article, KEYWORDS):
+        text_article_preview = get_articles_preview(article)
+        if search_keywords(text_article_preview, KEYWORDS):
             print(output_article(article, base_url))
 
-
-def get_articles_all_text(soup):
-    pass
+    print("-----------------------------------------------")
+    # Задача №2:
+    print("Задача №2 : Поиск по всему тексту")
+    for article in articles:
+        href = get_href_articles(article, base_url)
+        soup_article = get_soup(href, HEADERS)
+        text_all_articles = get_articles_all_text(soup_article)
+        if search_keywords(text_all_articles, KEYWORDS):
+            print(output_article(article, base_url))
 
 
 if __name__ == '__main__':
