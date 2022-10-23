@@ -9,6 +9,7 @@
 from requests import get
 import bs4
 from header import HEADERS
+from decorators import log, log_path
 from pprint import pprint
 
 
@@ -35,13 +36,16 @@ def search_keywords(text, keywords):
     set_search = set(text.lower().split()) & set(keywords)
     return set_search
 
-
+@log
+@log_path(path=r"logs\date.log")
 def get_date_articles(soup):
     time = soup.find('time')
     # print(time.attrs)
     return time['title']
 
 
+@log
+@log_path(path=r"logs\title.log")
 def get_title_articles(soup):
     title = soup.find(class_="tm-article-snippet__title-link")
     # print(title.prettify())
@@ -66,7 +70,7 @@ def output_article(soup, base_url):
     title = get_title_articles(soup)
     href = get_href_articles(soup, base_url)
     return f"<{date}> - <{title}> - <{href}>"
-    pass
+
 
 
 def main():
